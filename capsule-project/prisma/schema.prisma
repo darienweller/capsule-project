@@ -1,0 +1,67 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                 Int             @id @default(autoincrement())
+  email              String          @unique
+  auth0Id            String          @unique
+  bio                String?
+  profilePictureUrl  String?
+  createdAt          DateTime        @default(now())
+  capsules           Capsule[]
+  friends            Friend[]        @relation("UserFriends")
+  friendOf           Friend[]        @relation("UserFriendOf")
+
+  notifications      Notification[]  @relation("UserNotifications")
+  sentNotifications  Notification[]  @relation("SenderNotifications")
+}
+
+model Capsule {
+  id          Int      @id @default(autoincrement())
+  content     String
+  scheduledAt DateTime
+  isRevealed  Boolean  @default(false)
+  user        User     @relation(fields: [userId], references: [id])
+  userId      Int
+
+  createdAt   DateTime @default(now())
+
+  @@index([scheduledAt], name: "idx_scheduled_at")
+}
+
+model Friend {
+  id       Int    @id @default(autoincrement())
+  user     User   @relation("UserFriends", fields: [userId], references: [id])
+  userId   Int
+  friend   User   @relation("UserFriendOf", fields: [friendId], references: [id])
+  friendId Int
+  status   String @default("requested")
+
+  @@unique([userId, friendId])
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  senderId  Int
+  type      String
+  message   String
+  createdAt DateTime @default(now())
+  isRead    Boolean  @default(false)
+
+  user      User     @relation("UserNotifications", fields: [userId], references: [id])
+  sender    User     @relation("SenderNotifications", fields: [senderId], references: [id])
+}
+
