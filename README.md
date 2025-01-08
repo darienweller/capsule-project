@@ -1,4 +1,4 @@
-# Capsule
+# Capsule: Proof of Concept
 
 **Capsule** is a web-based social media platform where users can create time-delayed posts, or "capsules," that are revealed on their feed and their friends' feeds at a future date.
 
